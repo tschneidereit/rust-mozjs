@@ -19,7 +19,7 @@ use std::marker::PhantomData;
 use jsapi::{JS_NewContext, JS_DestroyContext, JS_NewRuntime, JS_DestroyRuntime};
 use jsapi::{JSContext, JSRuntime, JSObject, JSFlatString, JSFunction, JSString, Symbol, JSScript, jsid, Value};
 use jsapi::{RuntimeOptionsRef, ContextOptionsRef, ReadOnlyCompileOptions};
-use jsapi::{JS_SetErrorReporter, Evaluate3, JSErrorReport};
+use jsapi::{JS_SetErrorReporter, Evaluate2, JSErrorReport};
 use jsapi::{JS_SetGCParameter, JSGCParamKey};
 use jsapi::{Heap, Cell, HeapCellPostBarrier, HeapCellRelocate, HeapValuePostBarrier, HeapValueRelocate};
 use jsapi::{ThingRootKind, ContextFriendFields};
@@ -113,14 +113,11 @@ impl Runtime {
             (script_utf16.as_ptr(), script_utf16.len() as c_uint)
         };
         assert!(!ptr.is_null());
-        let _ar = JSAutoRequest::new(self.cx());
         let _ac = JSAutoCompartment::new(self.cx(), glob.get());
         let options = CompileOptionsWrapper::new(self.cx(), filename_cstr.as_ptr(), line_num);
 
-        let scopechain = AutoObjectVectorWrapper::new(self.cx());
-
         unsafe {
-            if !Evaluate3(self.cx(), scopechain.ptr, options.ptr,
+            if !Evaluate2(self.cx(), options.ptr,
                           ptr as *const u16, len as size_t, rval) {
                 debug!("...err!");
                 Err(())
