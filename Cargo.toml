@@ -11,7 +11,7 @@ debugmozjs = ['mozjs_sys/debugmozjs']
 
 [dependencies.mozjs_sys]
 git = "https://github.com/tschneidereit/mozjs"
-version = "*"
+rev = "c9cb19cdb16f0caed0fe132601440759b12ad764"
 
 [dependencies]
 libc = "*"
