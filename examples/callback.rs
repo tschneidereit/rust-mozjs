@@ -11,7 +11,7 @@ use std::str;
 
 use js::{JSCLASS_RESERVED_SLOTS_MASK,JSCLASS_RESERVED_SLOTS_SHIFT,JSCLASS_GLOBAL_SLOT_COUNT,JSCLASS_IS_GLOBAL};
 use js::jsapi::JS_GlobalObjectTraceHook;
-use js::jsapi::{CallArgs,CompartmentOptions,OnNewGlobalHookOption,Rooted,Value};
+use js::jsapi::{CallArgs,CompartmentOptions,OnNewGlobalHookOption,Rooted,Value, RootedValue};
 use js::jsapi::{JS_DefineFunction,JS_Init,JS_NewGlobalObject,JS_EncodeStringToUTF8,JS_ReportError};
 use js::jsapi::{JSAutoCompartment,JSAutoRequest,JSContext,JSClass};
 use js::jsval::UndefinedValue;
@@ -51,8 +51,9 @@ fn main() {
         let global = global_root.handle();
         let _ac = JSAutoCompartment::new(context, global.get());
         JS_DefineFunction(context, global, b"puts\0".as_ptr() as *const libc::c_char, Some(puts), 1, 0);
-        let javascript = "puts('Test Iñtërnâtiônàlizætiøn ┬─┬ノ( º _ ºノ) ');".to_string();
-        let _ = runtime.evaluate_script(global, javascript, "test.js".to_string(), 0);
+        let javascript = "puts('Test Iñtërnâtiônàlizætiøn ┬─┬ノ( º _ ºノ) ');";
+        let mut rval = RootedValue::new(runtime.cx(), UndefinedValue());
+        let _ = runtime.evaluate_script(global, javascript, "test.js", 0, rval.handle_mut());
     }
 }
 

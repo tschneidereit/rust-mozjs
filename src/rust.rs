@@ -23,7 +23,7 @@ use jsapi::{JS_SetErrorReporter, Evaluate3, JSErrorReport};
 use jsapi::{JS_SetGCParameter, JSGCParamKey};
 use jsapi::{Heap, Cell, HeapCellPostBarrier, HeapCellRelocate, HeapValuePostBarrier, HeapValueRelocate};
 use jsapi::{ThingRootKind, ContextFriendFields};
-use jsapi::{Rooted, RootedValue, Handle, MutableHandle, MutableHandleBase, RootedBase};
+use jsapi::{Rooted, Handle, MutableHandle, MutableHandleBase, RootedBase};
 use jsapi::{MutableHandleValue, HandleValue, HandleObject, HandleBase};
 use jsapi::AutoObjectVector;
 use jsapi::{ToBooleanSlow, ToNumberSlow, ToStringSlow};
@@ -99,7 +99,8 @@ impl Runtime {
         self.cx
     }
 
-    pub fn evaluate_script(&self, glob: HandleObject, script: String, filename: String, line_num: u32)
+    pub fn evaluate_script(&self, glob: HandleObject, script: &str, filename: &str,
+                           line_num: u32, rval: MutableHandleValue)
                     -> Result<(),()> {
         let script_utf16: Vec<u16> = script.utf16_units().collect();
         let filename_cstr = ffi::CString::new(filename.as_bytes()).unwrap();
@@ -118,12 +119,9 @@ impl Runtime {
 
         let scopechain = AutoObjectVectorWrapper::new(self.cx());
 
-        let mut rval = RootedValue::new(self.cx(), UndefinedValue());
-
         unsafe {
             if !Evaluate3(self.cx(), scopechain.ptr, options.ptr,
-                          ptr as *const u16, len as size_t,
-                          rval.handle_mut()) {
+                          ptr as *const u16, len as size_t, rval) {
                 debug!("...err!");
                 Err(())
             } else {

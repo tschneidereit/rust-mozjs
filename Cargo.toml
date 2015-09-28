@@ -10,7 +10,8 @@ build = "build.rs"
 debugmozjs = ['mozjs_sys/debugmozjs']
 
 [dependencies.mozjs_sys]
-git = "https://github.com/servo/mozjs"
+git = "https://github.com/tschneidereit/mozjs"
+version = "*"
 
 [dependencies]
 libc = "*"
